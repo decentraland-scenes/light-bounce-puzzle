@@ -35,7 +35,7 @@ const floatingWindRock = new FloatingRock(
   new GLTFShape('models/floatingWindRockGlow.glb'),
   new Transform({
     position: new Vector3(12, 2.5, 8),
-    rotation: Quaternion.Euler(0, -90, 0),
+    rotation: Quaternion.Euler(0, -90, 0)
   })
 )
 floatingRocks.push(floatingWindRock)
@@ -45,7 +45,7 @@ const floatingFireRock = new FloatingRock(
   new GLTFShape('models/floatingFireRockGlow.glb'),
   new Transform({
     position: new Vector3(8, 3, 12),
-    rotation: Quaternion.Euler(0, 180, 0),
+    rotation: Quaternion.Euler(0, 180, 0)
   })
 )
 floatingRocks.push(floatingFireRock)
@@ -55,7 +55,7 @@ const floatingWaterRock = new FloatingRock(
   new GLTFShape('models/floatingWaterRockGlow.glb'),
   new Transform({
     position: new Vector3(4, 3.5, 8),
-    rotation: Quaternion.Euler(0, 90, 0),
+    rotation: Quaternion.Euler(0, 90, 0)
   })
 )
 floatingRocks.push(floatingWaterRock)
@@ -65,7 +65,7 @@ const floatingEarthRock = new FloatingRock(
   new GLTFShape('models/floatingEarthRockGlow.glb'),
   new Transform({
     position: new Vector3(8, 4, 4),
-    rotation: Quaternion.Euler(0, 0, 0),
+    rotation: Quaternion.Euler(0, 0, 0)
   })
 )
 floatingRocks.push(floatingEarthRock)
@@ -88,7 +88,7 @@ let reflectCount = 0
 
 // Input
 const input = Input.instance
-let physicsCast = PhysicsCast.instance
+const physicsCast = PhysicsCast.instance
 let forwardVector: Vector3 = Vector3.Forward().rotate(Camera.instance.rotation)
 
 // Left mouse button
@@ -96,35 +96,37 @@ input.subscribe('BUTTON_DOWN', ActionButton.POINTER, true, (e) => {
   lightningOrbSound.getComponent(AudioSource).playOnce()
 
   // Switch off all rock glows
-  for (let rock of floatingRocks) {
+  for (const rock of floatingRocks) {
     rock.toggleGlow(false)
   }
 
-  if (e.hit.meshName == 'mirror_collider') {
+  if (e.hit.meshName === 'mirror_collider') {
     // Delete previous reflected rays and temp entities
     while (reflectedRays.length > 0) {
-      let reflectedRay = reflectedRays.pop()
+      const reflectedRay = reflectedRays.pop()
       engine.removeEntity(reflectedRay)
     }
     reflectCount = 0
-    let floatingRock = engine.entities[e.hit.entityId] as FloatingRock
+    const floatingRock = engine.entities[e.hit.entityId] as FloatingRock
     floatingRock.toggleGlow(true) // Turn on glow for the rock that's hit
     forwardVector = Vector3.Forward().rotate(Camera.instance.rotation) // Update forward vector
-    let reflectedVector: Vector3 = reflectVector(forwardVector, e.hit.normal)
+    const reflectedVector: Vector3 = reflectVector(forwardVector, e.hit.normal)
 
     // NEEDS REFACTORING
-    let forwardVec = Vector3.Forward().scale(1).rotate(Camera.instance.rotation)
-    let startPosition = Camera.instance.position.clone().add(forwardVec)
-    let distanceFromCamera = Vector3.Distance(startPosition, e.hit.hitPoint)
+    const forwardVec = Vector3.Forward()
+      .scale(1)
+      .rotate(Camera.instance.rotation)
+    const startPosition = Camera.instance.position.clone().add(forwardVec)
+    const distanceFromCamera = Vector3.Distance(startPosition, e.hit.hitPoint)
 
     // Ray
     ray.getComponent(Transform).position = startPosition
     ray.getComponent(Transform).position.y -= 0.5 // Offset ray
     ray.getComponent(Transform).lookAt(e.hit.hitPoint)
-    let startSize = ray.getComponent(Transform).scale.setAll(1)
+    const startSize = ray.getComponent(Transform).scale.setAll(1)
 
     // Scale the ray to size
-    let endSize = new Vector3(startSize.x, startSize.y, distanceFromCamera)
+    const endSize = new Vector3(startSize.x, startSize.y, distanceFromCamera)
     ray.addComponentOrReplace(
       new utils.ScaleTransformComponent(startSize, endSize, 0.1, () => {
         reflectRay(e.hit.hitPoint, reflectedVector)
@@ -145,17 +147,19 @@ input.subscribe('BUTTON_DOWN', ActionButton.POINTER, true, (e) => {
     )
   } else {
     // NEEDS REFACTORING
-    let forwardVec = Vector3.Forward().scale(1).rotate(Camera.instance.rotation)
-    let startPosition = Camera.instance.position.clone().add(forwardVec)
+    const forwardVec = Vector3.Forward()
+      .scale(1)
+      .rotate(Camera.instance.rotation)
+    const startPosition = Camera.instance.position.clone().add(forwardVec)
     ray.getComponent(Transform).position = startPosition
     ray.getComponent(Transform).position.y -= 0.5 // Offset ray
     forwardVector = Vector3.Forward().scale(5).rotate(Camera.instance.rotation) // Update forward vector
-    let newPos: Vector3 = Camera.instance.position.clone().add(forwardVector)
+    const newPos: Vector3 = Camera.instance.position.clone().add(forwardVector)
     ray.getComponent(Transform).lookAt(newPos)
-    let startSize = ray.getComponent(Transform).scale.setAll(1)
+    const startSize = ray.getComponent(Transform).scale.setAll(1)
 
     // Scale the ray to size
-    let endSize = new Vector3(startSize.x, startSize.y, 4)
+    const endSize = new Vector3(startSize.x, startSize.y, 4)
     ray.addComponentOrReplace(
       new utils.ScaleTransformComponent(startSize, endSize, 0.1)
     )
@@ -183,7 +187,7 @@ function reflectRay(hitPoint: Vector3, reflectedVector: Vector3) {
   // Reflected ray
   const reflectedRay = new ReflectedRay(rayShape, hitPoint, reflectedVector)
   reflectedRay.getComponent(Transform).position = hitPoint
-  let reflectedTarget = hitPoint.clone().add(reflectedVector)
+  const reflectedTarget = hitPoint.clone().add(reflectedVector)
   reflectedRay.getComponent(Transform).lookAt(reflectedTarget)
   reflectedRays.push(reflectedRay)
 
@@ -192,22 +196,24 @@ function reflectRay(hitPoint: Vector3, reflectedVector: Vector3) {
   playNote(reflectCount)
 
   physicsCast.hitFirst(reflectedRay.ray, (e) => {
-    let distance = Vector3.Distance(reflectedRay.ray.origin, e.hitPoint)
-    let startSize = reflectedRay.getComponent(Transform).scale
+    const distance = Vector3.Distance(reflectedRay.ray.origin, e.hitPoint)
+    const startSize = reflectedRay.getComponent(Transform).scale
 
     // Scale reflected ray to size
-    let endSize = new Vector3(startSize.x, startSize.y, distance)
-    let timeToTravel = distance * 0.05
+    const endSize = new Vector3(startSize.x, startSize.y, distance)
+    const timeToTravel = distance * 0.05
     reflectedRay.addComponentOrReplace(
       new utils.ScaleTransformComponent(
         startSize,
         endSize,
         timeToTravel,
         () => {
-          if (e.entity.meshName == 'mirror_collider') {
-            let roundMirror = engine.entities[e.entity.entityId] as FloatingRock
+          if (e.entity.meshName === 'mirror_collider') {
+            const roundMirror = engine.entities[
+              e.entity.entityId
+            ] as FloatingRock
             roundMirror.toggleGlow(true) // Turn on glow for mirror
-            let reflectedVector: Vector3 = reflectVector(
+            const reflectedVector: Vector3 = reflectVector(
               new Vector3(
                 reflectedRay.ray.direction.x,
                 reflectedRay.ray.direction.y,
@@ -240,8 +246,8 @@ function reflectRay(hitPoint: Vector3, reflectedVector: Vector3) {
 
 // Put in the direction of the previous ray and the normal of the raycast's hitpoint
 function reflectVector(incident: Vector3, normal: Vector3): Vector3 {
-  let dot = 2 * Vector3.Dot(incident, normal)
-  let reflected = incident.subtract(normal.multiplyByFloats(dot, dot, dot))
+  const dot = 2 * Vector3.Dot(incident, normal)
+  const reflected = incident.subtract(normal.multiplyByFloats(dot, dot, dot))
   return reflected
 }
 

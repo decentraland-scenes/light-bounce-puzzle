@@ -17,15 +17,15 @@ export class FloatingRock extends Entity {
     this.floatingRockGlow.getComponent(Transform).scale.setAll(0)
     this.floatingRockGlow.setParent(this)
 
-    let startPos = transform.position
-    let endPos = new Vector3(startPos.x, startPos.y + 0.25, startPos.z)
+    const startPos = transform.position
+    const endPos = new Vector3(startPos.x, startPos.y + 0.25, startPos.z)
 
     // Move the rock up and down between start and end positions
     this.addComponent(
       new utils.ToggleComponent(
         utils.ToggleState.Off,
         (value: utils.ToggleState) => {
-          if (value == utils.ToggleState.On) {
+          if (value === utils.ToggleState.On) {
             this.addComponentOrReplace(
               new utils.MoveTransformComponent(
                 startPos,
